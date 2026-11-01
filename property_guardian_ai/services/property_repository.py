@@ -114,6 +114,14 @@ class PropertyRepository:
             raise PropertyNotFoundError(property_id)
         return self.records[property_id]
 
+    def search(self, query: str) -> list[str]:
+        """Property ids whose id or address contains every word of the query (case-insensitive)."""
+        words = query.lower().replace(",", " ").split()
+        return [
+            pid for pid in self.property_ids()
+            if all(w in f"{pid} {self.records[pid].property.address}".lower() for w in words)
+        ]
+
     def monthly_for(self, property_id: str) -> list[MonthlyObservation]:
         self.get(property_id)
         return self.monthly.get(property_id, [])
