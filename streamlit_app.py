@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from property_guardian_ai.dashboard import build_house_html
 from property_guardian_ai.models.schemas import ModelScore, Priority, RiskAssessment, RiskSnapshot
 from property_guardian_ai.services.container import Services, build_services
 
@@ -13,6 +14,7 @@ DECREASE_BLUE = "#2a78d6"
 BAND_LINES = ((35, "Moderate"), (60, "High"), (80, "Very High"))
 PRIORITY_ICON = {Priority.HIGH: "🔴 High", Priority.MEDIUM: "🟠 Medium", Priority.LOW: "⚪ Low"}
 TOP_FEATURES = 8
+HOUSE_HEIGHT = 690
 
 
 @st.cache_resource(show_spinner="Training risk model and seeding memory…")
@@ -163,6 +165,23 @@ def render_validation(services: Services) -> None:
         st.markdown(f"- {caveat}")
 
 
+def _display_address(services: Services, property_id: str) -> str:
+    return f"{property_id} — {services.repository.get(property_id).property.address.split('(')[0].strip()}"
+
+
+def select_property(services: Services) -> str | None:
+    search_col, pick_col = st.columns([1, 1.4])
+    query = search_col.text_input("Search by address, city or ZIP", placeholder="e.g. Kenmore, 98028, Seattle")
+    matches = services.repository.search(query) if query.strip() else services.repository.property_ids()
+    if not matches:
+        st.error(f"No monitored property matches “{query}”. Property Guardian only assesses properties it has "
+                 "data for, so it won't make up hazards for an unknown address.")
+        return None
+    default = matches.index("KC-003") if "KC-003" in matches else 0
+    return pick_col.selectbox("Property", matches, index=default,
+                              format_func=lambda pid: _display_address(services, pid))
+
+
 def main() -> None:
     st.set_page_config(page_title="Property Guardian AI", page_icon="🏠", layout="wide")
     st.title("Property Guardian AI")
@@ -176,12 +195,11 @@ def main() -> None:
     tab_property, tab_portfolio, tab_model = st.tabs(["Property assessment", "Portfolio", "Model governance"])
 
     with tab_property:
-        ids = services.repository.property_ids()
-        property_id = st.selectbox(
-            "Property", ids, index=ids.index("KC-003"),
-            format_func=lambda pid: f"{pid} — {services.repository.get(pid).property.address.split('(')[0].strip()}",
-        )
+        property_id = select_property(services)
+        if property_id is None:
+            return
         assessment = services.orchestrator.assess(property_id)
+        st.iframe(build_house_html(assessment, services.repository.get(property_id)), height=HOUSE_HEIGHT)
         render_header(assessment)
         render_drivers(assessment)
         render_recommendations(assessment)

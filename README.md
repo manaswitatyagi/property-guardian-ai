@@ -76,9 +76,13 @@ cp .venv/lib/python3.12/site-packages/sklearn/.dylibs/libomp.dylib \
 
 ## Demo dashboard
 
-`streamlit_app.py` runs the full agent pipeline in the browser: pick a property to see its score, drivers with
-evidence, SHAP chart, confidence reasoning, recommendations, 12-month trend with a "why did it change" table,
-a portfolio ranking and the model validation report.
+`streamlit_app.py` runs the full agent pipeline in the browser. Search by address, city or ZIP and an
+**interactive house** is drawn for that property: click the roof, gutters, foundation, plumbing, walls,
+doors & windows or yard to see that component's risk score, evidence, SHAP attribution and the actions that
+reduce it (toggle *Risk heatmap* to tint the whole house). Scene details come from the data — rain clouds for
+frequent heavy rain, water when the home is within 2 km of it. Below the house: overall score, drivers, SHAP
+chart, confidence reasoning, recommendations, 12-month trend with a "why did it change" table, a portfolio
+ranking and the model validation report.
 
 ```bash
 .venv/bin/streamlit run streamlit_app.py
