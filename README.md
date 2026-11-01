@@ -74,6 +74,24 @@ cp .venv/lib/python3.12/site-packages/sklearn/.dylibs/libomp.dylib \
    "$(.venv/bin/python -c 'import sys; print(sys.base_prefix)')/lib/"
 ```
 
+## Demo dashboard
+
+`streamlit_app.py` runs the full agent pipeline in the browser: pick a property to see its score, drivers with
+evidence, SHAP chart, confidence reasoning, recommendations, 12-month trend with a "why did it change" table,
+a portfolio ranking and the model validation report.
+
+```bash
+.venv/bin/streamlit run streamlit_app.py
+```
+
+### Deploying to Streamlit Community Cloud
+
+1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub.
+2. **Create app** → repository `manaswitatyagi/property-guardian-ai`, branch `main`, main file `streamlit_app.py`.
+3. Under **Advanced settings** choose **Python 3.12**, then **Deploy**.
+
+Cloud installs use `requirements.txt` (pinned, CPU-only XGBoost) and `packages.txt` (OpenMP runtime).
+
 ## API
 
 | Method | Path | Returns |
