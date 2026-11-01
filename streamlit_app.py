@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import hashlib
+from pathlib import Path
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -15,10 +18,19 @@ BAND_LINES = ((35, "Moderate"), (60, "High"), (80, "Very High"))
 PRIORITY_ICON = {Priority.HIGH: "🔴 High", Priority.MEDIUM: "🟠 Medium", Priority.LOW: "⚪ Low"}
 TOP_FEATURES = 8
 HOUSE_HEIGHT = 690
+PACKAGE_DIR = Path(__file__).parent / "property_guardian_ai"
 
 
-@st.cache_resource(show_spinner="Training risk model and seeding memory…")
-def load_services() -> Services:
+def code_fingerprint() -> str:
+    """Hash of the package source, so cached services are rebuilt whenever the code changes."""
+    digest = hashlib.sha256()
+    for path in sorted(PACKAGE_DIR.rglob("*.py")):
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+@st.cache_resource(show_spinner="Training risk model and seeding memory…", max_entries=1)
+def load_services(code_version: str) -> Services:
     return build_services()
 
 
@@ -191,7 +203,7 @@ def main() -> None:
                "square footage come from historical King County records. Do not read these as real hazards.",
                icon="⚠️")
 
-    services = load_services()
+    services = load_services(code_fingerprint())
     tab_property, tab_portfolio, tab_model = st.tabs(["Property assessment", "Portfolio", "Model governance"])
 
     with tab_property:
