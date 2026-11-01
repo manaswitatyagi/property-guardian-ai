@@ -1,206 +1,201 @@
 from __future__ import annotations
 
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
-import streamlit.components.v1 as components
 
-from property_guardian_ai.services.data_loader import (
-    build_component_risk,
-    build_monitoring_narrative,
-    load_demo_data,
-)
+from property_guardian_ai.models.schemas import ModelScore, Priority, RiskAssessment, RiskSnapshot
+from property_guardian_ai.services.container import Services, build_services
+
+SERIES_BLUE = "#2a78d6"
+INCREASE_RED = "#e34948"
+DECREASE_BLUE = "#2a78d6"
+BAND_LINES = ((35, "Moderate"), (60, "High"), (80, "Very High"))
+PRIORITY_ICON = {Priority.HIGH: "🔴 High", Priority.MEDIUM: "🟠 Medium", Priority.LOW: "⚪ Low"}
+TOP_FEATURES = 8
 
 
-def build_demo() -> None:
-    st.set_page_config(page_title="Property Guardian AI Demo", layout="wide")
-    st.title("Property Guardian AI")
-    st.caption("House-by-house monitoring demo with visible asset-level risk checks for roof, plumbing, structure, and more.")
+@st.cache_resource(show_spinner="Training risk model and seeding memory…")
+def load_services() -> Services:
+    return build_services()
 
-    st.markdown(
-        """
-        <style>
-        .block-container { padding-top: 2rem; }
-        .stImage > img { border-radius: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); }
-        div[data-testid="stHorizontalBlock"] > div { align-items: stretch; }
-        </style>
-        """,
-        unsafe_allow_html=True,
+
+def _base_layout(fig: go.Figure, height: int) -> go.Figure:
+    fig.update_layout(
+        height=height, margin=dict(l=8, r=8, t=8, b=8),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        hoverlabel=dict(bgcolor="white", font_color="#0b0b0b"),
     )
+    fig.update_xaxes(gridcolor="rgba(128,128,128,0.15)", zeroline=False)
+    fig.update_yaxes(gridcolor="rgba(128,128,128,0.15)", zeroline=False)
+    return fig
 
-    data = load_demo_data()
-    properties = data["properties"]
-    monthly_risk = data["monthly_risk"]
 
-    property_id = st.selectbox("Select property", properties["property_id"].tolist())
-    selected_property = properties[properties["property_id"] == property_id].iloc[0]
-    selected_monthly = monthly_risk[monthly_risk["property_id"] == property_id].sort_values("month")
-    narrative = build_monitoring_narrative(selected_property, selected_monthly)
-    component_risk = build_component_risk(selected_property)
-    selected_component = str(st.query_params.get("component", st.session_state.get("selected_component", "Roof")))
-    if selected_component not in component_risk:
-        selected_component = "Roof"
-    st.session_state["selected_component"] = selected_component
+def trend_chart(history: list[RiskSnapshot]) -> go.Figure:
+    months = [s.month for s in history]
+    fig = go.Figure(go.Scatter(
+        x=months, y=[s.risk_score for s in history], mode="lines+markers",
+        line=dict(color=SERIES_BLUE, width=2), marker=dict(size=8),
+        hovertemplate="%{x|%b %Y}<br>Risk score %{y:.1f}<extra></extra>",
+    ))
+    for threshold, label in BAND_LINES:
+        fig.add_hline(y=threshold, line=dict(color="rgba(128,128,128,0.5)", width=1, dash="dot"),
+                      annotation_text=label, annotation_position="top left",
+                      annotation_font=dict(size=11, color="gray"))
+    fig.update_yaxes(range=[0, 100], title="Risk score")
+    return _base_layout(fig, 320)
 
-    latest = selected_monthly.iloc[-1]
-    prior = selected_monthly.iloc[-2]
-    delta = latest["monthly_risk_score_0_100"] - prior["monthly_risk_score_0_100"]
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Overall risk", f"{selected_property['risk_score_0_100']:.1f}")
-    col2.metric("Neighborhood", f"{selected_property['neighborhood_score']:.1f}")
-    col3.metric("Account activity", f"{selected_property['account_activity_score']:.1f}")
-    col4.metric("Device activity", f"{selected_property['device_activity_score']:.1f}")
-    col5.metric("Financial pressure", f"{selected_property['financial_pressure_score']:.1f}")
+def shap_chart(model_score: ModelScore) -> go.Figure:
+    top = sorted(model_score.contributions[:TOP_FEATURES], key=lambda c: c.contribution)
+    fig = go.Figure(go.Bar(
+        x=[c.contribution for c in top],
+        y=[f"{c.label} = {c.value:g}" for c in top],
+        orientation="h",
+        marker=dict(color=[INCREASE_RED if c.contribution > 0 else DECREASE_BLUE for c in top],
+                    line=dict(width=0)),
+        hovertemplate="%{y}<br>%{x:+.2f} pts<extra></extra>",
+    ))
+    fig.add_vline(x=0, line=dict(color="gray", width=1))
+    fig.update_xaxes(title="Contribution to score (pts vs portfolio baseline)")
+    return _base_layout(fig, 340)
 
-    st.subheader("Risk movement")
-    trend_delta = f"{delta:+.1f} pts vs prior month"
-    st.info(f"{narrative} | Change: {trend_delta}")
 
-    left_col, right_col = st.columns([1.15, 1.85], gap="large")
-    with left_col:
-        house_html = f"""
-        <style>
-        .house-map {{
-            position: relative;
-            width: 100%;
-            max-width: 520px;
-            height: 370px;
-            border-radius: 18px;
-            overflow: hidden;
-            border: 1px solid rgba(49, 51, 63, 0.15);
-            background-image: url('https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=80');
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-        }}
-        .label {{
-            position: absolute;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            color: white;
-            background: rgba(17, 24, 39, 0.72);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 999px;
-            padding: 6px 10px;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-        }}
-        .label:hover {{ transform: translateY(-1px); }}
-        .roof {{ left: 34%; top: 13%; }}
-        .plumbing {{ left: 58%; top: 57%; }}
-        .porch {{ left: 22%; bottom: 10%; }}
-        </style>
-        <div class="house-map">
-            <div class="label roof" onclick="window.parent.location.search='?component=Roof';">Roof</div>
-            <div class="label plumbing" onclick="window.parent.location.search='?component=Plumbing';">Plumbing</div>
-            <div class="label porch" onclick="window.parent.location.search='?component=Porch';">Porch</div>
-        </div>
-        """
-        components.html(house_html, height=430)
-        st.caption(f"Selected area: {selected_component}")
-    with right_col:
-        st.subheader("Property profile")
-        profile_cols = [
-            "address",
-            "city",
-            "state",
-            "year_built",
-            "roof_age_years",
-            "square_footage",
-            "distance_to_water_km",
-            "flood_zone",
-            "home_value_usd",
-        ]
-        st.dataframe(selected_property[profile_cols].to_frame().T, width="stretch")
+def render_header(assessment: RiskAssessment) -> None:
+    change = assessment.risk_change
+    cols = st.columns(4)
+    cols[0].metric("Risk score", f"{assessment.risk_score:.0f} / 100",
+                   delta=f"{change.score_change:+.1f} pts MoM" if change else None, delta_color="inverse")
+    cols[1].metric("Risk band", assessment.risk_label)
+    cols[2].metric("Confidence", f"{assessment.confidence.level.value.title()} ({assessment.confidence.score:.0f})")
+    cols[3].metric("Preventive actions", len(assessment.recommendations))
+    st.info(assessment.summary)
 
-    st.subheader("Asset-level condition review")
-    asset_order = ["Roof", "Porch", "Structure", "Plumbing", "Living area", "Bathtub", "Swimming pool"]
 
-    button_cols = st.columns(len(asset_order))
-    for idx, component_name in enumerate(asset_order):
-        with button_cols[idx]:
-            clicked = st.button(
-                component_name,
-                key=f"asset_{component_name}",
-                width="stretch",
-                type="secondary" if selected_component != component_name else "primary",
-            )
-            if clicked:
-                selected_component = component_name
-                st.session_state["selected_component"] = component_name
-                st.query_params["component"] = component_name
+def render_drivers(assessment: RiskAssessment) -> None:
+    left, right = st.columns([1, 1.3], gap="large")
+    with left:
+        st.subheader("Why is the risk this high?")
+        for driver in assessment.primary_drivers:
+            with st.container(border=True):
+                st.markdown(f"**{driver.name}** — component index {driver.score:.0f}/100")
+                st.caption(driver.explanation)
+                for item in driver.evidence:
+                    st.markdown(f"- {item}")
+        with st.expander("Confidence reasoning"):
+            for reason in assessment.confidence.reasons:
+                st.markdown(f"- {reason}")
+    with right:
+        st.subheader("Model explanation (SHAP)")
+        if assessment.model_explanation:
+            st.caption(f"{assessment.model_explanation.model_name} · portfolio baseline "
+                       f"{assessment.model_explanation.base_value:.1f} pts · red raises risk, blue lowers it")
+            st.plotly_chart(shap_chart(assessment.model_explanation), width="stretch")
+        else:
+            st.warning("No validated model available; scored with heuristic weights.")
 
-    component_name = selected_component
-    details = component_risk[component_name]
-    score = float(details["score"])
-    status = details["status"]
 
-    detail_col, insight_col = st.columns([1.2, 1.8], gap="large")
-    with detail_col:
-        st.markdown(f"### {component_name}")
-        st.metric("Risk score", f"{score:.0f}", delta=status)
-        st.progress(min(score, 100) / 100)
-        st.caption(details["detail"])
-    with insight_col:
-        st.markdown("**Why this is risky**")
-        for item in details["risk_factors"]:
-            st.write(f"• {item}")
+def render_recommendations(assessment: RiskAssessment) -> None:
+    st.subheader("Recommended preventive actions")
+    if not assessment.recommendations:
+        st.success("No preventive actions triggered for this property.")
+        return
+    for rec in assessment.recommendations:
+        with st.container(border=True):
+            st.markdown(f"**{rec.title}** · {PRIORITY_ICON[rec.priority]} · _{rec.driver}_")
+            st.write(rec.description)
+            st.caption(f"Evidence: {rec.evidence}")
 
-        st.markdown("**What can change the score**")
-        for item in details["mitigation"]:
-            st.write(f"• {item}")
 
-    tab_monitoring, tab_table = st.tabs(["Monitoring", "Portfolio"])
+def render_history(services: Services, assessment: RiskAssessment) -> None:
+    property_id = assessment.property_profile.property_id
+    history = services.memory.history(property_id)
+    st.subheader("How has risk evolved?")
+    st.plotly_chart(trend_chart(history), width="stretch")
 
-    with tab_monitoring:
-        st.subheader("Monthly risk trend")
-        st.line_chart(selected_monthly.set_index("month")["monthly_risk_score_0_100"])
+    change = assessment.risk_change
+    if change:
+        st.markdown(f"**{change.previous_month:%b %Y} → {change.current_month:%b %Y}:** {change.narrative}")
+        st.dataframe(pd.DataFrame([{
+            "Feature": c.label, "Previous": c.previous_value, "Current": c.current_value,
+            "Score impact (pts)": c.contribution_change,
+        } for c in change.top_changes]), hide_index=True, width="stretch")
 
-        st.subheader("Monitor components")
-        score_df = pd.DataFrame(
-            {
-                "Signal": [
-                    "Neighborhood",
-                    "Account activity",
-                    "Device activity",
-                    "Financial pressure",
-                    "Overall monitoring",
-                ],
-                "Score": [
-                    selected_property["neighborhood_score"],
-                    selected_property["account_activity_score"],
-                    selected_property["device_activity_score"],
-                    selected_property["financial_pressure_score"],
-                    selected_property["monitoring_score"],
-                ],
-            }
+    with st.expander("Monthly history table"):
+        st.dataframe(pd.DataFrame([{"Month": f"{s.month:%Y-%m}", "Risk score": s.risk_score} for s in history]),
+                     hide_index=True, width="stretch")
+
+
+def render_portfolio(services: Services) -> None:
+    rows = []
+    for pid in services.repository.property_ids():
+        history = services.memory.history(pid)
+        latest, previous = history[-1], history[-2]
+        record = services.repository.get(pid)
+        rows.append({
+            "Property": pid,
+            "City": record.property.address.split(",")[1].strip(),
+            "Flood zone": record.flood.flood_zone,
+            "Roof age": record.property.roof_age,
+            "Risk score": round(latest.risk_score, 1),
+            "MoM change": round(latest.risk_score - previous.risk_score, 1),
+        })
+    frame = pd.DataFrame(rows).sort_values("Risk score", ascending=False)
+    st.dataframe(frame, hide_index=True, width="stretch", column_config={
+        "Risk score": st.column_config.ProgressColumn("Risk score", min_value=0, max_value=100, format="%.1f"),
+    })
+
+
+def render_validation(services: Services) -> None:
+    report = services.model.validation
+    st.subheader("Model validation (grouped holdout)")
+    st.caption(f"{report.n_folds}-fold cross-validation grouped by property: no property is in both train and "
+               f"test. {report.n_rows} property-months across {report.n_properties} properties.")
+    cols = st.columns(5)
+    cols[0].metric("Holdout MAE", f"{report.holdout_mae:.1f} pts")
+    cols[1].metric("Holdout R²", f"{report.holdout_r2:.2f}")
+    cols[2].metric(f"ROC-AUC (≥{report.high_risk_threshold:.0f})", f"{report.roc_auc:.2f}" if report.roc_auc else "n/a")
+    cols[3].metric("Precision / Recall",
+                   f"{report.precision:.2f} / {report.recall:.2f}" if report.precision is not None else "n/a")
+    cols[4].metric(f"Baseline MAE ({report.baseline_model_name.split('-')[0]})", f"{report.baseline_holdout_mae:.1f} pts")
+    st.markdown("**Caveats**")
+    for caveat in report.caveats:
+        st.markdown(f"- {caveat}")
+
+
+def main() -> None:
+    st.set_page_config(page_title="Property Guardian AI", page_icon="🏠", layout="wide")
+    st.title("Property Guardian AI")
+    st.caption("Continuous, explainable property risk monitoring for underwriters — "
+               "every score comes with drivers, evidence, confidence and preventive actions.")
+    st.warning("Demo data: hazard, neighborhood and cost inputs are **simulated**; only coordinates, year built and "
+               "square footage come from historical King County records. Do not read these as real hazards.",
+               icon="⚠️")
+
+    services = load_services()
+    tab_property, tab_portfolio, tab_model = st.tabs(["Property assessment", "Portfolio", "Model governance"])
+
+    with tab_property:
+        ids = services.repository.property_ids()
+        property_id = st.selectbox(
+            "Property", ids, index=ids.index("KC-003"),
+            format_func=lambda pid: f"{pid} — {services.repository.get(pid).property.address.split('(')[0].strip()}",
         )
-        st.bar_chart(score_df.set_index("Signal")["Score"])
+        assessment = services.orchestrator.assess(property_id)
+        render_header(assessment)
+        render_drivers(assessment)
+        render_recommendations(assessment)
+        render_history(services, assessment)
+        with st.expander("Raw RiskAssessment JSON (API response)"):
+            st.json(assessment.model_dump(mode="json"), expanded=False)
 
-        st.subheader("Recent monthly pattern")
-        st.dataframe(
-            selected_monthly[["month", "monthly_risk_score_0_100", "dominant_risk_driver"]].tail(6),
-            width="stretch",
-        )
+    with tab_portfolio:
+        st.subheader("Portfolio risk ranking")
+        render_portfolio(services)
 
-    with tab_table:
-        st.subheader("Portfolio comparison")
-        portfolio = properties[[
-            "property_id",
-            "address",
-            "city",
-            "risk_score_0_100",
-            "neighborhood_score",
-            "account_activity_score",
-            "device_activity_score",
-            "financial_pressure_score",
-            "underwriting_risk_label",
-        ]].copy()
-        st.dataframe(portfolio, width="stretch")
+    with tab_model:
+        render_validation(services)
 
 
 if __name__ == "__main__":
-    build_demo()
+    main()
