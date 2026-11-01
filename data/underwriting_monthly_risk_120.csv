@@ -1,0 +1,121 @@
+property_id,month,hail_events,wind_events,heavy_rain_events,extreme_temperature_days,seasonal_climate_adjustment_pts,monthly_risk_score_0_100,monthly_risk_label,dominant_risk_driver
+KC-001,2025-11,0,0,1,1,1,85,Very High,seasonal climate
+KC-001,2025-12,0,0,1,2,1,86,Very High,seasonal climate
+KC-001,2026-01,0,0,3,3,1,88,Very High,heavy rain
+KC-001,2026-02,0,1,1,0,1,87,Very High,wind
+KC-001,2026-03,0,2,2,0,1,89,Very High,wind
+KC-001,2026-04,0,0,2,0,0,85,Very High,heavy rain
+KC-001,2026-05,0,0,1,0,0,84,Very High,heavy rain
+KC-001,2026-06,0,0,0,0,0,83,Very High,baseline property exposure
+KC-001,2026-07,0,0,0,2,0,84,Very High,temperature extremes
+KC-001,2026-08,0,0,1,2,0,85,Very High,heavy rain
+KC-001,2026-09,0,0,1,2,0,85,Very High,heavy rain
+KC-001,2026-10,0,1,0,0,0,85,Very High,wind
+KC-002,2025-11,0,1,1,1,0,50,Moderate,wind
+KC-002,2025-12,0,1,0,1,0,49,Moderate,wind
+KC-002,2026-01,0,0,2,2,0,50,Moderate,heavy rain
+KC-002,2026-02,0,0,0,0,0,47,Moderate,baseline property exposure
+KC-002,2026-03,0,1,2,0,0,51,Moderate,heavy rain
+KC-002,2026-04,0,0,1,1,0,49,Moderate,heavy rain
+KC-002,2026-05,0,0,0,0,0,47,Moderate,baseline property exposure
+KC-002,2026-06,0,0,0,0,0,47,Moderate,baseline property exposure
+KC-002,2026-07,1,0,0,1,0,50,Moderate,hail
+KC-002,2026-08,0,0,0,2,0,48,Moderate,temperature extremes
+KC-002,2026-09,0,0,1,0,0,48,Moderate,heavy rain
+KC-002,2026-10,0,0,2,1,0,50,Moderate,heavy rain
+KC-003,2025-11,0,0,1,0,1,95,Very High,seasonal climate
+KC-003,2025-12,0,1,1,0,1,97,Very High,wind
+KC-003,2026-01,0,0,0,0,1,94,Very High,seasonal climate
+KC-003,2026-02,0,0,6,1,1,100,Very High,heavy rain
+KC-003,2026-03,0,1,0,2,1,96,Very High,wind
+KC-003,2026-04,0,0,2,0,0,95,Very High,heavy rain
+KC-003,2026-05,0,0,0,1,0,94,Very High,temperature extremes
+KC-003,2026-06,0,1,1,0,0,96,Very High,wind
+KC-003,2026-07,0,0,0,1,0,94,Very High,temperature extremes
+KC-003,2026-08,0,0,1,0,0,94,Very High,heavy rain
+KC-003,2026-09,0,0,1,2,0,95,Very High,heavy rain
+KC-003,2026-10,0,1,2,1,0,97,Very High,heavy rain
+KC-004,2025-11,0,1,1,1,0,40,Moderate,wind
+KC-004,2025-12,0,0,0,0,0,37,Moderate,baseline property exposure
+KC-004,2026-01,0,0,0,1,0,37,Moderate,temperature extremes
+KC-004,2026-02,0,0,0,1,0,37,Moderate,temperature extremes
+KC-004,2026-03,0,0,0,0,0,37,Moderate,baseline property exposure
+KC-004,2026-04,0,0,2,0,0,39,Moderate,heavy rain
+KC-004,2026-05,0,1,0,0,0,38,Moderate,wind
+KC-004,2026-06,0,0,0,1,0,37,Moderate,temperature extremes
+KC-004,2026-07,0,0,1,0,0,38,Moderate,heavy rain
+KC-004,2026-08,0,0,0,1,0,37,Moderate,temperature extremes
+KC-004,2026-09,0,0,0,3,0,38,Moderate,temperature extremes
+KC-004,2026-10,0,1,2,2,0,41,Moderate,heavy rain
+KC-005,2025-11,0,1,0,1,0,33,Low,wind
+KC-005,2025-12,0,0,2,1,0,33,Low,heavy rain
+KC-005,2026-01,0,1,2,3,0,35,Moderate,heavy rain
+KC-005,2026-02,0,0,0,2,0,31,Low,temperature extremes
+KC-005,2026-03,0,0,1,0,0,32,Low,heavy rain
+KC-005,2026-04,0,0,0,0,0,31,Low,baseline property exposure
+KC-005,2026-05,1,0,0,1,0,33,Low,hail
+KC-005,2026-06,0,0,0,1,0,31,Low,temperature extremes
+KC-005,2026-07,0,0,0,0,0,31,Low,baseline property exposure
+KC-005,2026-08,0,0,0,1,0,31,Low,temperature extremes
+KC-005,2026-09,0,0,0,3,0,32,Low,temperature extremes
+KC-005,2026-10,0,0,1,0,0,32,Low,heavy rain
+KC-006,2025-11,0,0,0,0,0,48,Moderate,baseline property exposure
+KC-006,2025-12,0,0,1,4,0,51,Moderate,temperature extremes
+KC-006,2026-01,0,0,0,2,0,49,Moderate,temperature extremes
+KC-006,2026-02,0,0,1,0,0,49,Moderate,heavy rain
+KC-006,2026-03,0,1,0,1,0,50,Moderate,wind
+KC-006,2026-04,0,1,2,0,0,52,Moderate,heavy rain
+KC-006,2026-05,1,0,0,0,0,51,Moderate,hail
+KC-006,2026-06,0,1,0,0,2,52,Moderate,seasonal climate
+KC-006,2026-07,0,0,0,2,2,51,Moderate,seasonal climate
+KC-006,2026-08,0,0,0,2,2,51,Moderate,seasonal climate
+KC-006,2026-09,0,0,3,2,2,54,Moderate,heavy rain
+KC-006,2026-10,0,0,1,1,0,50,Moderate,heavy rain
+KC-007,2025-11,0,0,0,0,0,65,High,baseline property exposure
+KC-007,2025-12,0,1,3,2,0,70,High,heavy rain
+KC-007,2026-01,0,1,3,1,0,69,High,heavy rain
+KC-007,2026-02,1,0,1,0,0,68,High,hail
+KC-007,2026-03,1,1,1,0,0,69,High,hail
+KC-007,2026-04,0,1,0,0,0,66,High,wind
+KC-007,2026-05,0,0,1,0,0,66,High,heavy rain
+KC-007,2026-06,0,0,0,0,0,65,High,baseline property exposure
+KC-007,2026-07,0,0,0,2,0,65,High,temperature extremes
+KC-007,2026-08,0,0,0,2,0,65,High,temperature extremes
+KC-007,2026-09,0,0,2,7,0,69,High,temperature extremes
+KC-007,2026-10,0,1,0,1,0,67,High,wind
+KC-008,2025-11,0,0,2,0,1,95,Very High,heavy rain
+KC-008,2025-12,0,0,2,0,1,95,Very High,heavy rain
+KC-008,2026-01,0,1,1,2,1,96,Very High,wind
+KC-008,2026-02,0,0,1,0,1,94,Very High,seasonal climate
+KC-008,2026-03,0,1,1,0,1,95,Very High,wind
+KC-008,2026-04,0,0,3,0,0,95,Very High,heavy rain
+KC-008,2026-05,1,0,0,0,0,94,Very High,hail
+KC-008,2026-06,0,0,0,2,0,93,Very High,temperature extremes
+KC-008,2026-07,0,0,0,4,0,94,Very High,temperature extremes
+KC-008,2026-08,0,1,0,1,0,94,Very High,wind
+KC-008,2026-09,0,0,0,3,0,93,Very High,temperature extremes
+KC-008,2026-10,0,1,2,0,0,95,Very High,heavy rain
+KC-009,2025-11,0,0,1,2,0,35,Moderate,heavy rain
+KC-009,2025-12,0,1,0,2,0,36,Moderate,wind
+KC-009,2026-01,0,0,1,1,0,35,Moderate,heavy rain
+KC-009,2026-02,0,0,0,0,0,34,Low,baseline property exposure
+KC-009,2026-03,0,0,0,0,0,34,Low,baseline property exposure
+KC-009,2026-04,0,0,0,1,0,34,Low,temperature extremes
+KC-009,2026-05,0,0,1,0,0,34,Low,heavy rain
+KC-009,2026-06,0,0,0,1,0,34,Low,temperature extremes
+KC-009,2026-07,0,0,0,3,0,35,Moderate,temperature extremes
+KC-009,2026-08,0,0,0,1,0,34,Low,temperature extremes
+KC-009,2026-09,1,1,3,0,0,40,Moderate,heavy rain
+KC-009,2026-10,0,1,0,1,0,35,Moderate,wind
+KC-010,2025-11,0,0,3,1,0,66,High,heavy rain
+KC-010,2025-12,0,1,1,1,0,66,High,wind
+KC-010,2026-01,1,1,1,2,0,69,High,hail
+KC-010,2026-02,0,0,0,1,0,63,High,temperature extremes
+KC-010,2026-03,0,0,0,0,0,63,High,baseline property exposure
+KC-010,2026-04,0,0,2,0,0,65,High,heavy rain
+KC-010,2026-05,0,1,0,1,0,65,High,wind
+KC-010,2026-06,0,0,0,1,2,65,High,seasonal climate
+KC-010,2026-07,0,0,1,2,2,67,High,seasonal climate
+KC-010,2026-08,0,1,0,4,2,68,High,seasonal climate
+KC-010,2026-09,0,0,0,5,2,67,High,temperature extremes
+KC-010,2026-10,0,1,1,0,0,65,High,wind

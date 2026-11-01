@@ -1,0 +1,44 @@
+sheet,field,description,provenance,source_url
+Properties,property_id,Non-identifying unique synthetic property key; joins both data tables.,Derived synthetic,
+Properties,address,"Demo display location only: city/state/ZIP from source, synthetic property label (not actual street).",Simulated / demo only,
+Properties,city,Approximate city inferred from historical ZIP; should be verified for production use.,Derived from Kaggle ZIP,https://www.kaggle.com/datasets/harlfoxem/housesalesprediction/data
+Properties,state,US state of the historical property record.,Derived from Kaggle ZIP,https://www.kaggle.com/datasets/harlfoxem/housesalesprediction/data
+Properties,zip_code,ZIP from the Kaggle-derived King County source.,Kaggle historical record,https://raw.githubusercontent.com/46n/king-county-house-sales-analysis/main/data/housing.csv
+Properties,latitude,Real historical coordinate from King County Kaggle sample (not street-address verified).,Kaggle historical record,https://raw.githubusercontent.com/46n/king-county-house-sales-analysis/main/data/housing.csv
+Properties,longitude,Real historical coordinate from King County Kaggle sample (not street-address verified).,Kaggle historical record,https://raw.githubusercontent.com/46n/king-county-house-sales-analysis/main/data/housing.csv
+Properties,year_built,Recorded house construction year in 2014–2015 sales dataset.,Kaggle historical record,https://raw.githubusercontent.com/46n/king-county-house-sales-analysis/main/data/housing.csv
+Properties,roof_age_years,Simulated roof age as of October 2026.,Simulated / demo only,
+Properties,home_value_usd,Artificial 2026 scenario estimate derived from old sale price with a made-up multiplier; NOT an appraisal.,Simulated / demo only,
+Properties,square_footage,Living square footage from historic sales data.,Kaggle historical record,https://raw.githubusercontent.com/46n/king-county-house-sales-analysis/main/data/housing.csv
+Properties,flood_zone,"Synthetic FEMA-style category: X, X_SHADED (0.2%-annual-chance), AE; NOT a FEMA determination.",Simulated / demo only,
+Properties,distance_to_water_km,"Scenario distance to water in kilometers, NOT GIS calculated.",Simulated / demo only,
+Properties,hail_events_12mo,Synthetic count of hail occurrences in Nov 2025–Oct 2026.,Simulated / demo only,
+Properties,wind_events_12mo,Synthetic count of notable wind occurrences in Nov 2025–Oct 2026.,Simulated / demo only,
+Properties,heavy_rain_events_12mo,Synthetic count of heavy-rain occurrences in Nov 2025–Oct 2026.,Simulated / demo only,
+Properties,extreme_temperature_days_12mo,Synthetic extreme hot or cold days in Nov 2025–Oct 2026.,Simulated / demo only,
+Properties,heat_trend_c_per_decade,"Simulated change in average temperature, degrees C per 10 years.",Simulated / demo only,
+Properties,precipitation_trend_pct_per_decade,Simulated relative precipitation change (%) per decade.,Simulated / demo only,
+Properties,wildfire_trend_index_pts_per_decade,"Simulated increase in an artificial wildfire index (0–100) per decade, NOT event counts.",Simulated / demo only,
+Properties,population_trend_pct_5yr,Simulated 5-year neighborhood population change (percent).,Simulated / demo only,
+Properties,crime_index_0_100,"Synthetic crime index, 0=least, 100=most.",Simulated / demo only,
+Properties,urban_density_people_per_sqmi,Simulated number of residents per square mile.,Simulated / demo only,
+Properties,construction_inflation_yoy_pct,Simulated construction-cost change YoY in percent as of Oct 2026.,Simulated / demo only,
+Properties,labor_cost_index_base100,Artificial local construction labor cost index (100=illustrative baseline).,Simulated / demo only,
+Properties,risk_score_0_100,Illustrative weighted-score formula on 0–100 scale; not calibrated or actuarially valid.,Derived synthetic,
+Properties,underwriting_risk_label,Scenario label from score thresholds: Low <35; Moderate 35–59; High 60–79; Very High >=80.,Derived synthetic,
+Properties,underwriting_notes,"Synthetic example underwriting narrative, not a real decision.",Simulated / demo only,
+Properties,historical_sale_price_usd,"Original sale transaction value, 2014–2015 (NOT current value).",Kaggle historical record,https://raw.githubusercontent.com/46n/king-county-house-sales-analysis/main/data/housing.csv
+Properties,historical_sale_date,Original historical date of sale (2014–2015).,Kaggle historical record,https://raw.githubusercontent.com/46n/king-county-house-sales-analysis/main/data/housing.csv
+Properties,original_kaggle_id,Identifier in the Kaggle-derived King County dataset.,Kaggle historical record,https://raw.githubusercontent.com/46n/king-county-house-sales-analysis/main/data/housing.csv
+Properties,home_value_is_simulated,Boolean flag verifying that home_value_usd is illustrative.,Simulated / demo only,
+Properties,peril_attributes_simulated,Boolean flag verifying that all hazards and neighborhood factors are simulated.,Simulated / demo only,
+Properties,source_url,Public mirror of the Kaggle-derived historical housing dataset.,Simulated / demo only,
+Monthly Risk,month,YYYY-MM for the 12 full calendar months ending Oct 2026.,Simulated / demo only,
+Monthly Risk,hail_events,Simulated monthly hail events. Twelve months sum to property hail_events_12mo.,Simulated / demo only,
+Monthly Risk,wind_events,Simulated monthly wind events. Twelve months sum to property wind_events_12mo.,Simulated / demo only,
+Monthly Risk,heavy_rain_events,Simulated monthly heavy-rain events. Twelve months sum to property heavy_rain_events_12mo.,Simulated / demo only,
+Monthly Risk,extreme_temperature_days,Simulated monthly extreme temperature days. Twelve months sum to the property total.,Simulated / demo only,
+Monthly Risk,seasonal_climate_adjustment_pts,Artificial extra risk points for high-wildfire summers or flood-zone winters.,Simulated / demo only,
+Monthly Risk,monthly_risk_score_0_100,Simulated risk index varying around property baseline with monthly weather events.,Derived synthetic,
+Monthly Risk,monthly_risk_label,"Monthly risk band, same thresholds as underwriting_risk_label.",Derived synthetic,
+Monthly Risk,dominant_risk_driver,Most impactful synthetic month-level driver; no inference of causality.,Derived synthetic,
