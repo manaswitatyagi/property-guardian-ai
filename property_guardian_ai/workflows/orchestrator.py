@@ -8,6 +8,7 @@ from typing import Any, TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from property_guardian_ai.agents.climate_agent import ClimateAgent
+from property_guardian_ai.agents.component_agent import ComponentRiskAgent
 from property_guardian_ai.agents.flood_agent import FloodAgent
 from property_guardian_ai.agents.inflation_agent import InflationAgent
 from property_guardian_ai.agents.memory_agent import MemoryAgent
@@ -18,6 +19,7 @@ from property_guardian_ai.agents.risk_reasoning_agent import ReasoningInputs, Ri
 from property_guardian_ai.agents.weather_agent import WeatherAgent
 from property_guardian_ai.models.schemas import (
     ClimateRisk,
+    ComponentRisk,
     FloodRisk,
     ModelScore,
     NeighborhoodRisk,
@@ -48,6 +50,7 @@ class GuardianState(TypedDict, total=False):
     cost: ReplacementCostRisk
     model_score: ModelScore | None
     recommendations: list[Recommendation]
+    component_risks: list[ComponentRisk]
     risk_change: RiskChangeExplanation | None
     assessment: RiskAssessment
 
@@ -68,6 +71,13 @@ def _logged(name: str, node: Node) -> Node:
     return wrapper
 
 
+def _context(state: GuardianState) -> RecommendationContext:
+    return RecommendationContext(
+        profile=state["profile"], weather=state["weather"], flood=state["flood"],
+        climate=state["climate"], neighborhood=state["neighborhood"], cost=state["cost"],
+    )
+
+
 class Orchestrator:
     """Coordinates the agents as a LangGraph workflow. Agents only exchange typed objects via state."""
 
@@ -82,6 +92,7 @@ class Orchestrator:
         self._neighborhood = NeighborhoodAgent()
         self._inflation = InflationAgent()
         self._recommender = RecommendationAgent()
+        self._components = ComponentRiskAgent()
         self._reasoner = RiskReasoningAgent()
         self._graph = self._build_graph()
 
@@ -117,11 +128,11 @@ class Orchestrator:
         return {"model_score": self._model.score(state["record"], latest)}
 
     def _recommendation_node(self, state: GuardianState) -> dict[str, Any]:
-        context = RecommendationContext(
-            profile=state["profile"], weather=state["weather"], flood=state["flood"],
-            climate=state["climate"], neighborhood=state["neighborhood"], cost=state["cost"],
-        )
-        return {"recommendations": self._recommender.run(context)}
+        return {"recommendations": self._recommender.run(_context(state))}
+
+    def _component_node(self, state: GuardianState) -> dict[str, Any]:
+        components = self._components.run(_context(state), state["recommendations"], state.get("model_score"))
+        return {"component_risks": components}
 
     def _memory_node(self, state: GuardianState) -> dict[str, Any]:
         return {"risk_change": self._memory.explain_change(state["record"].property.property_id)}
@@ -132,6 +143,7 @@ class Orchestrator:
             climate=state["climate"], neighborhood=state["neighborhood"], cost=state["cost"],
             recommendations=state["recommendations"], model_score=state.get("model_score"),
             risk_change=state.get("risk_change"),
+            component_risks=tuple(state["component_risks"]),
         )
         return {"assessment": self._reasoner.run(inputs)}
 
@@ -165,6 +177,7 @@ class Orchestrator:
             "inflation": self._inflation_node,
             "model_scoring": self._model_node,
             "recommendation": self._recommendation_node,
+            "components": self._component_node,
             "memory": self._memory_node,
             "reasoning": self._reasoning_node,
             "persist": self._persist_node,
@@ -177,7 +190,8 @@ class Orchestrator:
             graph.add_edge("property", hazard)
         graph.add_edge(list(HAZARD_NODES), "model_scoring")
         graph.add_edge("model_scoring", "recommendation")
-        graph.add_edge("recommendation", "memory")
+        graph.add_edge("recommendation", "components")
+        graph.add_edge("components", "memory")
         graph.add_edge("memory", "reasoning")
         graph.add_edge("reasoning", "persist")
         graph.add_edge("persist", END)

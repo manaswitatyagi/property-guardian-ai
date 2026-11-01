@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from property_guardian_ai.agents.base import BaseAgent
 from property_guardian_ai.models.schemas import (
     ClimateRisk,
+    ComponentRisk,
     Confidence,
     ConfidenceLevel,
     FeatureContribution,
@@ -56,6 +57,7 @@ class ReasoningInputs:
     recommendations: list[Recommendation]
     model_score: ModelScore | None = None
     risk_change: RiskChangeExplanation | None = None
+    component_risks: tuple[ComponentRisk, ...] = ()
 
     def component_scores(self) -> dict[str, float]:
         age_score = min(100.0, self.profile.property_age * 0.6 + self.profile.roof_age * 2.0)
@@ -190,4 +192,5 @@ class RiskReasoningAgent(BaseAgent):
             model_explanation=inputs.model_score,
             risk_change=inputs.risk_change,
             recommendations=inputs.recommendations,
+            component_risks=list(inputs.component_risks),
         )

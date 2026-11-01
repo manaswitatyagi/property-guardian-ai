@@ -1,6 +1,7 @@
 from .schemas import (
     ClimateObservation,
     ClimateRisk,
+    ComponentRisk,
     Confidence,
     ConfidenceLevel,
     CostObservation,
@@ -31,6 +32,7 @@ from .schemas import (
 __all__ = [
     "ClimateObservation",
     "ClimateRisk",
+    "ComponentRisk",
     "Confidence",
     "ConfidenceLevel",
     "CostObservation",

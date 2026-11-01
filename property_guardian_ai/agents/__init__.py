@@ -1,5 +1,6 @@
 from .base import BaseAgent
 from .climate_agent import ClimateAgent
+from .component_agent import ComponentRiskAgent
 from .flood_agent import FloodAgent
 from .inflation_agent import InflationAgent
 from .memory_agent import MemoryAgent
@@ -12,6 +13,7 @@ from .weather_agent import WeatherAgent
 __all__ = [
     "BaseAgent",
     "ClimateAgent",
+    "ComponentRiskAgent",
     "FloodAgent",
     "InflationAgent",
     "MemoryAgent",

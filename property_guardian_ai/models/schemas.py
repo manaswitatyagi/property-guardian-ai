@@ -245,6 +245,19 @@ class RiskChangeExplanation(FrozenModel):
     narrative: str
 
 
+class ComponentRisk(FrozenModel):
+    """Risk to one physical part of the home, with the evidence and actions that apply to it."""
+
+    key: str
+    name: str
+    score: float = Field(ge=0, le=100)
+    band: str
+    explanation: str
+    evidence: list[str]
+    model_contributions: list[FeatureContribution] = Field(default_factory=list)
+    recommendations: list[Recommendation] = Field(default_factory=list)
+
+
 class Confidence(FrozenModel):
     score: float = Field(ge=0, le=100)
     level: ConfidenceLevel
@@ -267,6 +280,7 @@ class RiskAssessment(FrozenModel):
     model_explanation: ModelScore | None = None
     risk_change: RiskChangeExplanation | None = None
     recommendations: list[Recommendation]
+    component_risks: list[ComponentRisk] = Field(default_factory=list)
 
 
 class RiskSnapshot(FrozenModel):
